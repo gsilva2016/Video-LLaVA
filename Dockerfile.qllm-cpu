@@ -1,0 +1,23 @@
+FROM intel/intel-optimized-pytorch:latest
+
+USER root
+RUN apt-get update -y || true; DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    wget git python3-opencv && \
+    rm -rf /var/lib/apt/lists/*
+RUN pip install transformers==4.31.0 sentencepiece==0.1.99 shortuuid accelerate==0.21.0 peft==0.4.0 "pydantic<2,>=1" "markdown2[all]" scikit-learn==1.2.2 gradio==3.35.2 gradio_client==0.2.9 httpx==0.24.0 uvicorn fastapi einops==0.6.1 einops-exts==0.0.4 timm==0.6.13
+RUN pip install neural-compressor intel-extension-for-transformers datasets
+RUN pip install tiktoken protobuf transformers_stream_generator
+RUN pip install einops transformers_stream_generator
+RUN pip install decord opencv-python git+https://github.com/facebookresearch/pytorchvideo.git@28fe037d212663c6a24f373b94cc5d478c8c1a1d
+RUN pip install opencv-python-headless
+
+WORKDIR /demo
+COPY assets/ ./assets/
+COPY LICENSE .
+COPY pyproject.toml .
+COPY README.md .
+COPY scripts/ ./scripts/
+COPY TRAIN_AND_VALIDATE.md .
+COPY videollava/ ./videollava/
+
+CMD ["python", "-m",  "videollava.serve.gradio_web_server"]

@@ -125,10 +125,10 @@ def clear_history(state, state_):
 conv_mode = "llava_v1"
 model_path = 'LanguageBind/Video-LLaVA-7B'
 cache_dir = './cache_dir'
-device = 'cuda'
-load_8bit = True
-load_4bit = False
-dtype = torch.float16
+device = 'cpu'
+load_8bit = False
+load_4bit = False # not supported by ITREX
+dtype = torch.float32
 handler = Chat(model_path, conv_mode=conv_mode, load_8bit=load_8bit, load_4bit=load_8bit, device=device, cache_dir=cache_dir)
 # handler.model.to(dtype=dtype)
 if not os.path.exists("temp"):
@@ -243,7 +243,7 @@ with gr.Blocks(title='Video-LLaVA🚀', theme=gr.themes.Default(), css=block_css
                     [image1, video, textbox, first_run, state, state_, chatbot, images_tensor])
 
 # app = gr.mount_gradio_app(app, demo, path="/")
-demo.launch()
+demo.launch(share=True)
 
 # uvicorn videollava.serve.gradio_web_server:app
 # python -m  videollava.serve.gradio_web_server

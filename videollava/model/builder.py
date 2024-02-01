@@ -19,6 +19,7 @@ import shutil
 
 from transformers import AutoTokenizer, AutoModelForCausalLM, AutoConfig, BitsAndBytesConfig
 import torch
+import intel_extension_for_pytorch as ipex
 from videollava.model import *
 from videollava.constants import DEFAULT_IMAGE_PATCH_TOKEN, DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN, \
     DEFAULT_VIDEO_PATCH_TOKEN, DEFAULT_VID_START_TOKEN, DEFAULT_VID_END_TOKEN
@@ -30,9 +31,9 @@ def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, l
     if device != "cuda":
         kwargs['device_map'] = {"": device}
 
-    if load_8bit:
+    if load_8bit and device != "cpu":
         kwargs['load_in_8bit'] = True
-    elif load_4bit:
+    elif load_4bit and device != "cpu":
         kwargs['load_in_4bit'] = True
         kwargs['quantization_config'] = BitsAndBytesConfig(
             load_in_4bit=True,
@@ -40,6 +41,18 @@ def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, l
             bnb_4bit_use_double_quant=True,
             bnb_4bit_quant_type='nf4'
         )
+    elif load_4bit and device == "cpu":
+        from intel_extension_for_transformers.transformers import AutoModelForCausalLM as AutoModelForCausalLMIntel
+        from intel_extension_for_transformers.transformers import WeightOnlyQuantConfig
+        quantization_config = WeightOnlyQuantConfig(
+          compute_dtype="fp16" if device_map == "xpu" else "fp32",
+          weight_dtype="int4_fullrange",
+          group_size=32,
+          scale_dtype="fp16" if device_map == "xpu" else "fp32"
+          ) #default is A16W4G16
+        
+    elif device == "cpu":
+        kwargs['torch_dtype'] = torch.float32
     else:
         kwargs['torch_dtype'] = torch.float16
 
@@ -162,5 +175,17 @@ def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, l
         context_len = model.config.max_sequence_length
     else:
         context_len = 2048
+
+    # do not use until llava and video-llava are supported by ITREX
+    if load_4bit and device == "cpu" and 1==2:
+        print("Replacing with int4 RTN model for CPU...")
+        model = AutoModelForCausalLM.from_pretrained(
+                   model_name,
+                   device_map=device_map,
+                   trust_remote_code=True,
+                   use_llm_runtime=False,
+                   quantization_config=quantization_config
+                   ).eval()
+
 
     return tokenizer, model, processor, context_len
