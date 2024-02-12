@@ -25,7 +25,7 @@ from videollava.constants import DEFAULT_IMAGE_PATCH_TOKEN, DEFAULT_IM_START_TOK
     DEFAULT_VIDEO_PATCH_TOKEN, DEFAULT_VID_START_TOKEN, DEFAULT_VID_END_TOKEN
 
 
-def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, load_4bit=False, device_map="auto", device="cuda", **kwargs):
+def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, load_4bit=False, device_map="auto", device="cuda", dtype=torch.float16, **kwargs):
     kwargs = {"device_map": device_map, **kwargs}
 
     if device != "cuda":
@@ -51,10 +51,9 @@ def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, l
           scale_dtype="fp16" if device_map == "xpu" else "fp32"
           ) #default is A16W4G16
         
-    elif device == "cpu":
-        kwargs['torch_dtype'] = torch.float32
-    else:
-        kwargs['torch_dtype'] = torch.float16
+    kwargs['torch_dtype'] = dtype
+
+    print("kwargs: " , kwargs)
 
     if 'llava' in model_name.lower():
         # Load LLaVA model
@@ -158,7 +157,7 @@ def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, l
             image_tower = model.get_image_tower()
             if not image_tower.is_loaded:
                 image_tower.load_model()
-            image_tower.to(device=device, dtype=torch.float16)
+            image_tower.to(device=device, dtype=dtype)
             image_processor = image_tower.image_processor
             processor['image'] = image_processor
 
@@ -166,7 +165,7 @@ def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, l
             video_tower = model.get_video_tower()
             if not video_tower.is_loaded:
                 video_tower.load_model()
-            video_tower.to(device=device, dtype=torch.float16)
+            video_tower.to(device=device, dtype=dtype)
             video_processor = video_tower.video_processor
             processor['video'] = video_processor
     # ==========================================================================================================

@@ -49,12 +49,12 @@ The service is a research preview intended for non-commercial use only, subject 
 
 
 class Chat:
-    def __init__(self, model_path, conv_mode, model_base=None, load_8bit=False, load_4bit=False, device='cuda', cache_dir=None):
+    def __init__(self, model_path, conv_mode, model_base=None, load_8bit=False, load_4bit=False, device='cuda', cache_dir=None, dtype=torch.float16):
         disable_torch_init()
         model_name = get_model_name_from_path(model_path)
         self.tokenizer, self.model, processor, context_len = load_pretrained_model(model_path, model_base, model_name,
                                                                                    load_8bit, load_4bit,
-                                                                                   device=device, cache_dir=cache_dir)
+                                                                                   device=device, cache_dir=cache_dir, dtype=dtype)
         self.image_processor = processor['image']
         self.video_processor = processor['video']
         self.conv_mode = conv_mode

@@ -129,7 +129,7 @@ device = 'cpu'
 load_8bit = False
 load_4bit = False # not supported by ITREX
 dtype = torch.float32
-handler = Chat(model_path, conv_mode=conv_mode, load_8bit=load_8bit, load_4bit=load_8bit, device=device, cache_dir=cache_dir)
+handler = Chat(model_path, conv_mode=conv_mode, load_8bit=load_8bit, load_4bit=load_8bit, device=device, cache_dir=cache_dir, dtype=dtype)
 # handler.model.to(dtype=dtype)
 if not os.path.exists("temp"):
     os.makedirs("temp")
@@ -243,7 +243,15 @@ with gr.Blocks(title='Video-LLaVA🚀', theme=gr.themes.Default(), css=block_css
                     [image1, video, textbox, first_run, state, state_, chatbot, images_tensor])
 
 # app = gr.mount_gradio_app(app, demo, path="/")
-demo.launch(share=True)
+server_port=os.environ.get("SERVER_PORT")
+if server_port is not None:
+    server_port = int(server_port)
+else:
+    server_port = 8888
+
+demo.launch(share=True, 
+        server_name=os.environ.get("SERVER_NAME") if not None else "127.0.0.1", 
+        server_port=server_port)
 
 # uvicorn videollava.serve.gradio_web_server:app
 # python -m  videollava.serve.gradio_web_server
