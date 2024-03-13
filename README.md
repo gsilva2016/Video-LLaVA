@@ -134,11 +134,15 @@ CPU Based GradeIO in Docker Container
 ```bash
 git clone https://github.com/gsilva2016/Video-LLaVA.git
 cd Video-LLaVA
-git checkout cpu_int44 
+git checkout cpu 
 docker build -t video-llava-cpu:1.0 -f Dockerfile.qllm-cpu .
 docker run --rm -it -v `pwd`:/savedir --net host video-llava-cpu:1.0
 ```
 
+If ssh'ing into the headlesss server then set GradeIO web info so remote clients can connect to it
+```bash
+docker run --rm -it -v `pwd`:/savedir --net host -e SERVER_PORT=8888 -e SERVER_NAME="MY_IP_FOR_REMOTE_SSH_CLIENTS_TO_CONNECT_TO" video-llava-cpu:1.0
+```
 
 ## 🤖 API
 **We open source all codes.** If you want to load the model (e.g. ```LanguageBind/Video-LLaVA-7B```) on local, you can use the following code snippets.
