@@ -1,4 +1,6 @@
-FROM intel/intel-optimized-pytorch:latest
+FROM intel/intel-optimized-pytorch:2.1.0-pip-base
+# > 2.1 PT yields an error with Video-LLaVA
+#FROM intel/intel-optimized-pytorch:latest
 
 USER root
 RUN apt-get update -y || true; DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
