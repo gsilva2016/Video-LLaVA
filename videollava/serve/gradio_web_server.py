@@ -128,7 +128,7 @@ cache_dir = './cache_dir'
 device = 'cpu'
 load_8bit = False
 load_4bit = False # not supported by ITREX
-dtype = torch.float32
+dtype = torch.bfloat16
 handler = Chat(model_path, conv_mode=conv_mode, load_8bit=load_8bit, load_4bit=load_8bit, device=device, cache_dir=cache_dir, dtype=dtype)
 # handler.model.to(dtype=dtype)
 if not os.path.exists("temp"):

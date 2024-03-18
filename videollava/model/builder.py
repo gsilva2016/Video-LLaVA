@@ -175,6 +175,10 @@ def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, l
     else:
         context_len = 2048
 
+    #model = model.half().to(device=device, dtype=dtype)
+    model.eval()
+    model = ipex.optimize(model, dtype=dtype)
+
     # do not use until llava and video-llava are supported by ITREX
     if load_4bit and device == "cpu" and 1==2:
         print("Replacing with int4 RTN model for CPU...")
